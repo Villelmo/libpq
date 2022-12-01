@@ -89,6 +89,13 @@ int main(int argc, char **argv){
 		 exit_nicely(conn);
 	 }
 
-	 
+	/* Set always-secure search path, so malicious users can't take control */
+	 res = PQexec(conn, "SET search_path = testlipq3");
+	 if(PQresultStatus(res) != PGRES_COMMAND_OK){
+		 fprintf(stderr, "SET failed: %s", PQerrorMessage(conn));
+		 PQclear(res);
+		 exit_nicely(conn);
+	 }
+	 PQclear(res);
 }
 
