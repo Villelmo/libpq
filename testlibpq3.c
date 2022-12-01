@@ -9,6 +9,9 @@
 #include <sys/types.h>
 #include "libpq-fe.h"
 
+/* for ntohl/htonl */
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 static void exit_nicely(PGconn *conn){
 	PQfinish(conn);
@@ -97,5 +100,54 @@ int main(int argc, char **argv){
 		 exit_nicely(conn);
 	 }
 	 PQclear(res);
+
+	 /* Here is our out-of-line parameter value */
+	 paramValues[0] = "joe's place";
+
+	 res = PQexecParams(conn, "SELECT * FROM test1 WHERE t = $1",
+			1, /*one param*/
+		       NULL, /* let the backend deduce param type*/
+	               paramValues,
+		       NULL, /* don't need param lengths since text*/
+		       NULL, /* default to all text params*/
+		       1);
+
+	if(PQresultStatus(res) != PGRES_TUPLES_OK){
+		fprintf(stderr,"SELECT failed: %s",PQerrorMessage(conn));
+		PQclear(res);
+		exit_nicely(conn);
+	}
+
+	show_binary_results(res);
+	PQclear(res);
+
+	/* Convert integer value "2" to network byte order */
+	binaryIntVal = htonl((uint32_t) 2);
+
+	/* Set up parameter arrays for PQexecParams */
+	paramValues[0] = (char *) &binaryIntVal;
+	paramLengths[0] = sizeof(binaryIntVal);
+	paramFormats[0] = 1; /* binary */
+
+	res = PQexecParams(conn, "SELECT * FROM test1 WHERE i = $1::int4",
+			1, /* one param*/
+			NULL, /* let the backend deduce param type*/
+			paramValues,
+			paramLengths,
+			paramFormats,
+			1); /* ask for binary results */
+	if(PQresultStatus(res) != PGRES_TUPLES_OK){
+		fprintf(stderr, "SELECT failed: %s", PQerrorMessage(conn));
+		PQclear(res);
+		exit_nicely(conn);
+	}
+
+	show_binary_results(res);
+
+	PQclear(res);
+
+	/* close the connection to the database and cleanup */
+	PQfinish(conn);
+	return 0;
 }
 
