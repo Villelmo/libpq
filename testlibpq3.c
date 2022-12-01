@@ -9,9 +9,6 @@
 #include <sys/types.h>
 #include "libpq-fe.h"
 
-/* for ntohl/htonl*/
-#include <netinet/in.h>
-#include <arpa/inet.h>
 
 static void exit_nicely(PGconn *conn){
 	PQfinish(conn);
@@ -82,4 +79,9 @@ int main(int argc, char **argv){
 	 else 
 		 conninfo = "dbname = postgres";
 
+
+	 /* Make a connection to the database */
+	 conn = PQconnectdb(conninfo);
+
 }
+
