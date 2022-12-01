@@ -73,4 +73,13 @@ int main(int argc, char **argv){
 	int paramLengths[1];
 	int paramFormats[1];
 	uint32_t binaryIntVal;
+
+	/* If the user supplies a parameter on the command line, use it as the	 
+	 * conninfo string; otherwise default to setting dbname=postgres and using environment variables or defaults for all other connection parameters
+	 */
+	 if(arg > 1)
+		 conninfo = argv[1];
+	 else 
+		 conninfo = "dbname = postgres";
+
 }
