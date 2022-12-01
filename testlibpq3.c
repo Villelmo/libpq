@@ -64,3 +64,13 @@ static void show_binary_results(PGresult *res){
 		printf("\n\n");
 	}
 }
+
+int main(int argc, char **argv){
+	const char *conninfo;
+	PGconn *conn;
+	PGresult *res;
+	const char *paramValues[1];
+	int paramLengths[1];
+	int paramFormats[1];
+	uint32_t binaryIntVal;
+}
